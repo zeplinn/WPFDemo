@@ -1,0 +1,34 @@
+﻿<Window x:Class="WPFDemo.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ViewModel="clr-namespace:WPFDemo.ViewModel"
+        xmlns:View="clr-namespace:WPFDemo.View"
+        Title="02350 Demo" Height="600" Width="800" Icon="/Icon.ico">
+    <!-- This is where you set the Data Context of the View (Window), which tells the WPF engine where to look for the properties used by the bindings. -->
+    <!-- The namespace of the MainViewModel class has to be specified above, this is important to remember, to avoid a lot of problems in getting bindings to work. -->
+    <!-- Also the namespaces (Java: packages) has to be defined, for the used classes that are not part of WPF, -->
+    <!--  meaning the classes you have created, just like it is done with Using (Java: Import) statements in the C# code.-->
+    <Window.DataContext>
+        <ViewModel:MainViewModel />
+    </Window.DataContext>
+
+    <!-- What you se below is the only thing that is in this View (Window), -->
+    <!--  to the right is a panel with controls and to the right is a grid with two UserControls, for the shapes and lines. -->
+    <!-- The StackPanel organizes things from left to right, because the orientation is set to Horizontal. -->
+    <!-- The ItemControls shows the objects they are bound, using the DataTemplates defined in the App.xaml file. -->
+    <StackPanel Orientation="Horizontal">
+        <!-- The Controls (visual components), in the left side of the View (Window) are defined in the 'SidePanelUserControl'-->
+        <View:SidePanelUserControl/>
+
+        <!-- This creates a grid to the right in the StackPanel, with only 1 column and 1 row, but the Grid is necessary to put the 2 ItemsControls in the same area on top of each other -->
+        <Grid>
+            <!-- An ItemControl shows the objects of the property it is bound to. -->
+            <!-- The ItemControl does not know how to display these objects and will by default show them with a TextBlock containing the return value of the objects "ToString()" method.  -->
+            <!--  To override the visual presentation of the elements, Data Templates are used, which can be seen in the "app.xaml" file. -->
+            <!-- These ItemsControls are bound to the public Lines and Shapes properties of the MainViewModel class. -->
+            <!-- The order of the ItemsControls are important as the Lines will be shown first with the Shapes on top, try switching them. -->
+            <ItemsControl ItemsSource="{Binding Lines}"/>
+            <ItemsControl ItemsSource="{Binding Shapes}"/>
+        </Grid>
+    </StackPanel>
+</Window>
