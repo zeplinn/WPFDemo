@@ -204,8 +204,8 @@ namespace WPFDemo.ViewModel
                 var shape = TargetShape(e);
                 // This checks if this is the first Shape chosen during the Line adding operation, 
                 //  by looking at the addingLineFrom variable, which is empty when no Shapes have previously been choosen.
-                // If this is the first Shape choosen, and if so, the Shape is saved in the AddingLineFrom variable.
-                //  Also the Shape is set as selected, to make it look different visually.
+                // If this is the first Shape choosen, and if so, the Shape is saved in the AddingLineFrom variable, 
+                //  also the Shape is set as selected, to make it look different visually.
                 if (addingLineFrom == null) { addingLineFrom = shape; addingLineFrom.IsSelected = true; }
                 // If this is not the first Shape choosen, and therefore the second, 
                 //  it is checked that the first and second Shape are different.
