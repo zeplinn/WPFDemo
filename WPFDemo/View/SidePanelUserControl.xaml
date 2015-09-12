@@ -49,11 +49,11 @@
                         <!-- It is important to understand that the DataContext 'inside' the DataGrid is a 'Shape' object from the MainViewModels 'Shapes' collection, -->
                         <!--  which the DataGrid is bound to. -->
                         <!-- The DataGrids columns are bound to the properties of the current Shape. -->
-                        <DataGridTextColumn Binding="{Binding Number}" Header="Number" Width="*" IsReadOnly="True"/>
-                        <DataGridTextColumn Binding="{Binding X}" Header="X" Width="*"/>
-                        <DataGridTextColumn Binding="{Binding Y}" Header="Y" Width="*"/>
-                        <DataGridTextColumn Binding="{Binding Width}" Header="Width" Width="*"/>
-                        <DataGridTextColumn Binding="{Binding Height}" Header="Height" Width="*"/>
+                        <DataGridTextColumn Binding="{Binding Shape.Number}" Header="Number" Width="*" IsReadOnly="True"/>
+                        <DataGridTextColumn Binding="{Binding Shape.X}" Header="X" Width="*"/>
+                        <DataGridTextColumn Binding="{Binding Shape.Y}" Header="Y" Width="*"/>
+                        <DataGridTextColumn Binding="{Binding Shape.Width}" Header="Width" Width="*"/>
+                        <DataGridTextColumn Binding="{Binding Shape.Height}" Header="Height" Width="*"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <!-- The 'Remove chosen shape' Button is bound to the MainViewModels 'RemoveShapeCommand'. -->

@@ -1,8 +1,10 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace WPFDemo.Model
@@ -162,5 +164,7 @@ namespace WPFDemo.Model
         // The ToString() method is inheritied from the Object class, that all classes inherit from.
         // This method uses an expression-bodied member (http://www.informit.com/articles/article.aspx?p=2414582) to simplify a method that only returns a value;
         public override string ToString() => Number.ToString();
+        
+
     }
 }

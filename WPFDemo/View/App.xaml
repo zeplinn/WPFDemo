@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:Model="clr-namespace:WPFDemo.Model;assembly=WPFDemo.Model"
              xmlns:View="clr-namespace:WPFDemo.View"
+             xmlns:ViewModel="clr-namespace:WPFDemo.ViewModel"
              StartupUri="MainWindow.xaml">
     <!-- This is where resources are defines for alle windows to use. -->
     <Application.Resources>
@@ -10,7 +11,7 @@
         <!-- This Visual description is defined in the 'NodeUserControl'. -->
         <!-- If you remove this template the Shape will be show with a TextBlock, that shows the return value of the "ToString()" method. -->
         <!-- The Data Type tells the WPF engine, that this Data Template should be applied for the Shape class, in the Model namespace (Java: package). -->
-        <DataTemplate DataType="{x:Type Model:Shape}">
+        <DataTemplate DataType="{x:Type ViewModel:ShapeViewModel}">
             <Canvas>
                 <View:ShapeUserControl/>
             </Canvas>

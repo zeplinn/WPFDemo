@@ -75,7 +75,18 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\AddLineCommand.cs" />
+    <Compile Include="Command\AddShapeCommand.cs" />
+    <Compile Include="Command\IUndoRedoCommand.cs" />
+    <Compile Include="Command\MoveShapeCommand.cs" />
+    <Compile Include="Command\RemoveLinesCommand.cs" />
+    <Compile Include="Command\RemoveShapesCommand.cs" />
+    <Compile Include="Command\UndoRedoController.cs" />
+    <Compile Include="Helpers\BasicBoxes.cs" />
+    <Compile Include="Behavior\MoveBehavior.cs" />
+    <Compile Include="Helpers\HelperMethods.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\ShapeViewModel.cs" />
     <Compile Include="View\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -91,13 +102,6 @@
     <Compile Include="View\SidePanelUserControl.xaml.cs">
       <DependentUpon>SidePanelUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Command\AddLineCommand.cs" />
-    <Compile Include="Command\AddShapeCommand.cs" />
-    <Compile Include="Command\IUndoRedoCommand.cs" />
-    <Compile Include="Command\MoveShapeCommand.cs" />
-    <Compile Include="Command\RemoveLinesCommand.cs" />
-    <Compile Include="Command\RemoveShapesCommand.cs" />
-    <Compile Include="Command\UndoRedoController.cs" />
     <ApplicationDefinition Include="View\App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

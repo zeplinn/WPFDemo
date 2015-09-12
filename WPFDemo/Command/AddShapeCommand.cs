@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WPFDemo.ViewModel;
 
 namespace WPFDemo.Command
 {
@@ -19,20 +20,20 @@ namespace WPFDemo.Command
         //  therefore when this collection is changed in a object of this class, 
         //  it also changes the collection that the MainViewModel uses.
         // For a description of an ObservableCollection see the MainViewModel class.
-        private ObservableCollection<Shape> shapes;
+        private ObservableCollection<ShapeViewModel> shapes;
         // The 'shape' field holds a new shape, that is added to the 'shapes' collection, 
         //  and if undone, it is removed from the collection.
-        private Shape shape;
+        private ShapeViewModel shape;
 
         #endregion
 
         #region Constructor
 
         // For changing the current state of the diagram.
-        public AddShapeCommand(ObservableCollection<Shape> _shapes, Shape _shape) 
+        public AddShapeCommand(ObservableCollection<ShapeViewModel> _shapes, Shape _shape) 
         { 
             shapes = _shapes;
-            shape = _shape;
+            shape = new ShapeViewModel(_shape);
         }
 
         #endregion

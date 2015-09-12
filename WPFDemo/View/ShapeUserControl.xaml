@@ -1,16 +1,26 @@
-﻿<UserControl x:Class="WPFDemo.View.ShapeUserControl"
+﻿<UserControl
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:b="clr-namespace:WPFDemo.Behavior"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
-             mc:Ignorable="d" 
-             Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" Width="{Binding Width}" Height="{Binding Height}" 
+             xmlns:local="clr-namespace:WPFDemo.View" x:Name="userControl" x:Class="WPFDemo.View.ShapeUserControl"
+             mc:Ignorable="d"  Width="{Binding Shape.Width}" Height="{Binding Shape.Height}" 
              d:DesignHeight="100" d:DesignWidth="100">
-    <!-- Above the position (X and Y) and size (Width and Height) is bound for the Shape. -->
-    <!-- The Canvas.Left and Canvas.Top are attached properties, that the Shape only has because it is part of a Canvas. -->
-    
+    <!-- Above the size (Width and Height) is bound for the Shape. -->
+
+    <!--The Behavior implement the move functionality for the node with the MoveBehavior class.-->
+    <!--When using Behaviors the shape should have its own viewmodel, but for demo purposes it get exposed in Shape-->
+    <i:Interaction.Behaviors>
+        <b:MoveBehavior CanvasLeft="{Binding Shape.X}" CanvasTop="{Binding Shape.Y}" 
+                        Command="{Binding MoveCommand }" OldCanvasTop="{Binding OldY}" OldCanvasLeft="{Binding OldX}"
+                        IsMoveEnabled="{Binding DataContext.IsMoveable, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                        />
+    </i:Interaction.Behaviors>
+
+
     <!-- The 'Shape' class is shown with a visual 'Shape' control, just like in the 02350SuperSimpleDemo. -->
     <!-- The important thing to understand is that the DataContext of this UserControl is a 'Shape' object, -->
     <!--  from the MainViewModels 'Shapes' collection because this 'UserControl' is used by the ItemsCollection in the MainWindow, -->
@@ -22,7 +32,7 @@
         <!--  this ellipse becomes visible and indicates with its color whether is has already been chosen as part of the Line drawing operation. -->
         <!-- The fill color is bound to the SelectedColor property on the Shape, which returns a Brush, which is a visual object that specifies the color. -->
         <!-- The reason brushes are used is because the color can be solid, which is the default or a gradient, or even others. -->
-        <Ellipse Fill="{Binding SelectedColor}" Stroke="Transparent" StrokeThickness="6" />
+        <Ellipse Fill="{Binding Shape.SelectedColor}" Stroke="Transparent" StrokeThickness="6" />
         <!-- The second lowest layer in the stack are two texts ('choose' and 'by clicking'). -->
         <!-- The reason for the grid, is to divide the height of the Shape in 5 areas and putting the texts, -->
         <!--  in the second and fourth area. -->
@@ -58,12 +68,12 @@
             <!-- This specifies the point of rotation for the animation that rotates the Shape. -->
             <!-- The data binding binds to the CenterX and CenterY properties of the Shape Model object. -->
             <Ellipse.RenderTransform>
-                <RotateTransform CenterX="{Binding CenterX}" CenterY="{Binding CenterY}"/>
+                <RotateTransform CenterX="{Binding Shape.CenterX}" CenterY="{Binding Shape.CenterY}"/>
             </Ellipse.RenderTransform>
             <!-- This specifies the animation which is triggered by the ellipse being loaded, -->
             <!--  and it specifies that the ellipse should rotate its angle 360 degress every 7 seconds, repeating forever. -->
             <Ellipse.Triggers>
-                <EventTrigger RoutedEvent="Ellipse.Loaded">
+                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                     <BeginStoryboard>
                         <Storyboard>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Angle" From="0" To="360" Duration="0:0:7" RepeatBehavior="Forever" />
@@ -71,29 +81,10 @@
                     </BeginStoryboard>
                 </EventTrigger>
             </Ellipse.Triggers>
-            <!-- This uses the MVVMLight package to bind mouse events to commands on the MainViewModel. -->
-            <!-- More specifically it binds the three events MouseDown, MouseMove and MouseUp, -->
-            <!--  to the corresponding commands (MouseDownShapeCommand, MouseMoveShapeCommand and MouseUpShapeCommand) on the MainViewModel. -->
-            <!-- It also uses the Interactivity namespace from Blend (another XAML IDE for graphical designers), to make use of triggers, but you do not need to concern yourself with that. -->
-            <!-- The interesting thing about this Data Binding is that it uses RelativeSource to bind to another DataContext, -->
-            <!--  than that of the ShapeUserControl. -->
-            <!-- The RelativeSource finds the first parent element which is a Window, which is the MainWindow, -->
-            <!--  then it uses that DataContext to bind to the MainViewModels command properties, previously mentioned. -->
-            <!-- You can just reuse this code to bind events to commands, which is what most .NET developers do, -->
-            <!--  after finding this solution on StackOverflow.com or a similar site. -->
-            <!-- Another interesting thing is that a property called 'PassEventArgsToCommand' is set to true, -->
-            <!--  which makes MVVMLight pass the event parameters to the command. -->
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="MouseDown">
-                    <cmd:EventToCommand Command="{Binding DataContext.MouseDownShapeCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" PassEventArgsToCommand="True"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MouseMove">
-                    <cmd:EventToCommand Command="{Binding DataContext.MouseMoveShapeCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" PassEventArgsToCommand="True"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MouseUp">
-                    <cmd:EventToCommand Command="{Binding DataContext.MouseUpShapeCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" PassEventArgsToCommand="True"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
+            
+            
+            <!--the Old move trigger system was located here but it have been replaced the MoveBehavior in the top-->
+
         </Ellipse>
         <!-- The fourth lowest, and therefore the highest layer of the stack is a text that shows the Number of the Shape. -->
         <!-- The Number is put in the middle with TextAlign and VerticalAlign. -->

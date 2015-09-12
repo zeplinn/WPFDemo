@@ -23,17 +23,55 @@ namespace WPFDemo.ViewModel
     /// </summary>
     public class MainViewModel : ViewModelBase
     {
+        /*
+        ------------------IMPORTANT READING------------------
+
+        This Demo is an alternative example to the other Advanced Demo
+        showcasing how to describe the move action used by Shape
+        with a more "generic approach".
+
+        WARNING: Do not study this version before you understand how the standard Advanced demo is working 
+            
+            Changes in this Demo version Compared to the other WPFDemos
+
+            new classes added:
+                - BasicBoxes
+                - HelperMethods
+                - MoveBehavior
+                - ShapeViewModel
+                
+             The following Classes have recieved structual changes to make use of ShapeViewModel And MoveBehavior.
+                - MainViewModel
+                - AddShapeCommand
+                - MoveShapeCommand
+                - RemoveShapeCommand
+                - ShapeUserControl
+
+            the following Xaml-files have had thier databinding updated (ex. from {Binding x} to {Binding Shape.X}).
+                - ShapeUserControl
+                - App (DataTemplate type Changed to ShapeViewModel)
+                - SidePanelUserControl
+                https://github.com/zeplinn/WPFDemo.git
+        */
+
+
+
         // A reference to the Undo/Redo controller.
         private UndoRedoController undoRedoController = UndoRedoController.Instance;
 
         // Keeps track of the state, depending on whether a line is being added or not.
         private bool isAddingLine;
+        private bool _isMoveable;
+        public bool IsMoveable
+        {
+            get { return _isMoveable; }
+            private set { _isMoveable = value; RaisePropertyChanged(); }
+        }
         // Used for saving the shape that a line is drawn from, while it is being drawn.
         private Shape addingLineFrom;
-        // Saves the initial point that the mouse has during a move operation.
-        private Point initialMousePosition;
-        // Saves the initial point that the shape has during a move operation.
-        private Point initialShapePosition;
+      
+        
+
         // Used for making the shapes transparent when a new line is being added.
         // This method uses an expression-bodied member (http://www.informit.com/articles/article.aspx?p=2414582) to simplify a method that only returns a value;
         public double ModeOpacity => isAddingLine ? 0.4 : 1.0;
@@ -48,7 +86,7 @@ namespace WPFDemo.ViewModel
         // The "{ get; set; }" syntax describes that a private field 
         //  and default getter setter methods should be generated.
         // This is called Auto-Implemented Properties (http://msdn.microsoft.com/en-us/library/bb384054.aspx).
-        public ObservableCollection<Shape> Shapes { get; set; }
+        public ObservableCollection<ShapeViewModel> Shapes { get; set; }
         public ObservableCollection<Line> Lines { get; set; }
 
         // Commands that the UI can be bound to.
@@ -63,12 +101,12 @@ namespace WPFDemo.ViewModel
         public ICommand RemoveLinesCommand { get; }
 
         // Commands that the UI can be bound to.
-        public ICommand MouseDownShapeCommand { get; }
-        public ICommand MouseMoveShapeCommand { get; }
+
         public ICommand MouseUpShapeCommand { get; }
 
         public MainViewModel()
         {
+            IsMoveable = true;
             // Here the list of Shapes is filled with 2 Nodes. 
             // The "new Type() { prop1 = value1, prop2 = value }" syntax is called an Object Initializer, which creates an object and sets its values.
             // Java:
@@ -80,15 +118,15 @@ namespace WPFDemo.ViewModel
             // Also a constructor could be created for the Shape class that takes the parameters (X, Y, Width and Height), 
             //  and the following could be done:
             // new Shape(30, 40, 80, 80);
-            Shapes = new ObservableCollection<Shape>() { 
-                new Shape() { X = 30, Y = 40, Width = 80, Height = 80 }, 
-                new Shape() { X = 140, Y = 230, Width = 100, Height = 100 } 
+            Shapes = new ObservableCollection<ShapeViewModel>() { 
+                new ShapeViewModel(new Shape() { X = 30, Y = 40, Width = 80, Height = 80 }), 
+                new ShapeViewModel(new Shape() { X = 140, Y = 230, Width = 100, Height = 100 }) 
             };
             // Here the list of Lines i filled with 1 Line that connects the 2 Shapes in the Shapes collection.
             // ElementAt() is an Extension Method, that like many others can be used on all types of collections.
             // It works just like the "Shapes[0]" syntax would be used for arrays.
             Lines = new ObservableCollection<Line>() { 
-                new Line() { From = Shapes.ElementAt(0), To = Shapes.ElementAt(1) } 
+                new Line() { From = Shapes.ElementAt(0).Shape, To = Shapes.ElementAt(1).Shape } 
             };
 
             // The commands are given the methods they should use to execute, and find out if they can execute.
@@ -104,8 +142,7 @@ namespace WPFDemo.ViewModel
             RemoveLinesCommand = new RelayCommand<IList>(RemoveLines, CanRemoveLines);
 
             // The commands are given the methods they should use to execute, and find out if they can execute.
-            MouseDownShapeCommand = new RelayCommand<MouseButtonEventArgs>(MouseDownShape);
-            MouseMoveShapeCommand = new RelayCommand<MouseEventArgs>(MouseMoveShape);
+
             MouseUpShapeCommand = new RelayCommand<MouseButtonEventArgs>(MouseUpShape);
         }
 
@@ -122,13 +159,14 @@ namespace WPFDemo.ViewModel
         // Removes the chosen Shapes with a RemoveShapesCommand.
         private void RemoveShape(IList _shapes)
         {
-            undoRedoController.AddAndExecute(new RemoveShapesCommand(Shapes, Lines, _shapes.Cast<Shape>().ToList()));
+            undoRedoController.AddAndExecute(new RemoveShapesCommand(Shapes, Lines, _shapes.Cast<ShapeViewModel>().ToList()));
         }
 
         // Starts the procedure to remove a Line, by changing the mode to 'isAddingLine', 
         //  and making the shapes transparent.
         private void AddLine()
         {
+            IsMoveable = false;
             isAddingLine = true;
             RaisePropertyChanged(() => ModeOpacity);
         }
@@ -143,57 +181,7 @@ namespace WPFDemo.ViewModel
             undoRedoController.AddAndExecute(new RemoveLinesCommand(Lines, _lines.Cast<Line>().ToList()));
         }
 
-        // There are two reasons for doing a 'MouseDown' on a Shape, to move it or to draw a line from it.
-        // It the state is not 'isAddingEdge', the mouse is captured, to move the Shape.
-        // The reason for the capture is to receive mouse move events, even when the mouse is outside the application window.
-        private void MouseDownShape(MouseButtonEventArgs e)
-        {
-            // Checks that a line is not being drawn.
-            if (!isAddingLine)
-            {
-                // The Shape is gotten from the mouse event.
-                var shape = TargetShape(e);
-                // The mouse position relative to the target of the mouse event.
-                var mousePosition = RelativeMousePosition(e);
-
-                // When the shape is moved with the mouse, the MouseMoveShape method is called many times, 
-                //  for each part of the movement.
-                // Therefore to only have 1 Undo/Redo command saved for the whole movement, the initial position is saved, 
-                //  during the start of the movement, so that it together with the final position, 
-                //  from when the mouse is released, can become one Undo/Redo command.
-                // The initial shape position is saved to calculate the offset that the shape should be moved.
-                initialMousePosition = mousePosition;
-                initialShapePosition = new Point(shape.X, shape.Y);
-
-                // The mouse is captured, so the current shape will always be the target of the mouse events, 
-                //  even if the mouse is outside the application window.
-                e.MouseDevice.Target.CaptureMouse();
-            }
-        }
-
-        // This is only used for moving a Shape, and only if the mouse is already captured.
-        // This uses 'var' which is an implicit type variable (https://msdn.microsoft.com/en-us/library/bb383973.aspx).
-        private void MouseMoveShape(MouseEventArgs e)
-        {
-            // Checks that the mouse is captured and that a line is not being drawn.
-            if (Mouse.Captured != null && !isAddingLine)
-            {
-                // The Shape is gotten from the mouse event.
-                var shape = TargetShape(e);
-                // The mouse position relative to the target of the mouse event.
-                var mousePosition = RelativeMousePosition(e);
-
-                // The Shape is moved by the offset between the original and current mouse position.
-                // The View (GUI) is then notified by the Shape, that its properties have changed.
-                shape.X = initialShapePosition.X + (mousePosition.X - initialMousePosition.X);
-                shape.Y = initialShapePosition.Y + (mousePosition.Y - initialMousePosition.Y);
-            }
-        }
-
-        // There are two reasons for doing a 'MouseUp'.
-        // Either a Line is being drawn, and the second Shape has just been chosen
-        //  or a Shape is being moved and the move is now done.
-        // This uses 'var' which is an implicit type variable (https://msdn.microsoft.com/en-us/library/bb383973.aspx).
+       
         private void MouseUpShape(MouseButtonEventArgs e)
         {
             // Used for adding a Line.
@@ -220,33 +208,14 @@ namespace WPFDemo.ViewModel
                     // The 'isAddingLine' and 'addingLineFrom' variables are cleared, 
                     //  so the MainViewModel is ready for another Line adding operation.
                     isAddingLine = false;
+                    IsMoveable = true;
                     addingLineFrom = null;
                     // The property used for visually indicating which Shape has already chosen are choosen is cleared, 
                     //  so the View can return to its original and default apperance.
                     RaisePropertyChanged(() => ModeOpacity);
                 }
             }
-            // Used for moving a Shape.
-            else
-            {
-                // The Shape is gotten from the mouse event.
-                var shape = TargetShape(e);
-                // The mouse position relative to the target of the mouse event.
-                var mousePosition = RelativeMousePosition(e);
-
-                // The Shape is moved back to its original position, so the offset given to the move command works.
-                shape.X = initialShapePosition.X;
-                shape.Y = initialShapePosition.Y;
-
-                // Now that the Move Shape operation is over, the Shape is moved to the final position, 
-                //  by using a MoveNodeCommand to move it.
-                // The MoveNodeCommand is given the offset that it should be moved relative to its original position, 
-                //  and with respect to the Undo/Redo functionality the Shape has only been moved once, with this Command.
-                undoRedoController.AddAndExecute(new MoveShapeCommand(shape, mousePosition.X - initialMousePosition.X, mousePosition.Y - initialMousePosition.Y));
-                
-                // The mouse is released, as the move operation is done, so it can be used by other controls.
-                e.MouseDevice.Target.ReleaseMouseCapture();
-            }
+            
         }
 
         // Gets the shape that was clicked.

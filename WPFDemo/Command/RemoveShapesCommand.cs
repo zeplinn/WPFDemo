@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WPFDemo.ViewModel;
 
 namespace WPFDemo.Command
 {
@@ -20,7 +21,7 @@ namespace WPFDemo.Command
         //  therefore when this collection is changed in a object of this class, 
         //  it also changes the collection that the MainViewModel uses.
         // For a description of an ObservableCollection see the MainViewModel class.
-        private ObservableCollection<Shape> shapes;
+        private ObservableCollection<ShapeViewModel> shapes;
 
         // The 'lines' field holds the current collection of lines, 
         //  and the reference points to the same collection as the one the MainViewModel point to, 
@@ -31,7 +32,7 @@ namespace WPFDemo.Command
 
         // The 'shapesToRemove' field holds a collection of existing shapes, that are removed from the 'shapes' collection, 
         //  and if undone, they are added to the collection.
-        private List<Shape> shapesToRemove;
+        private List<ShapeViewModel> shapesToRemove;
 
         // The 'linesToRemove' field holds a collection of existing lines, that are removed from the 'lines' collection, 
         //  and if undone, they are added to the collection.
@@ -42,7 +43,7 @@ namespace WPFDemo.Command
         #region Constructor
 
         // For the current state of the diagram.
-        public RemoveShapesCommand(ObservableCollection<Shape> _shapes, ObservableCollection<Line> _lines, List<Shape> _shapesToRemove)
+        public RemoveShapesCommand(ObservableCollection<ShapeViewModel> _shapes, ObservableCollection<Line> _lines, List<ShapeViewModel> _shapesToRemove)
         {
             shapes = _shapes;
             lines = _lines;
@@ -66,7 +67,7 @@ namespace WPFDemo.Command
             //
             //    linesToRemove.Add(line);
             //  }
-            linesToRemove = _lines.Where(x => _shapesToRemove.Any(y => y.Number == x.From.Number || y.Number == x.To.Number)).ToList();
+            linesToRemove = _lines.Where(x => _shapesToRemove.Any(y => y.Shape.Number == x.From.Number || y.Shape.Number == x.To.Number)).ToList();
         }
 
         #endregion
